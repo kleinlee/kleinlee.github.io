@@ -1,3 +1,24 @@
+const isApple = /(iPhone|iPod|iPad|Macintosh|Mac OS X)/i.test(navigator.userAgent);
+
+// confirm："IOS系统版本需要高于17.4"
+if (isApple) {
+    const iosVersionMatch = navigator.userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/);
+    if (iosVersionMatch) {
+        const majorVersion = parseInt(iosVersionMatch[1]);
+        const minorVersion = parseInt(iosVersionMatch[2]);
+        const patchVersion = iosVersionMatch[3] ? parseInt(iosVersionMatch[3]) : 0;
+        
+        // 检查是否低于17.4版本
+        if (majorVersion < 17 || (majorVersion === 17 && minorVersion < 4)) {
+            const shouldUpdate = confirm("IOS系统版本需要高于17.4");
+            // 可以根据用户选择执行后续操作
+            if (shouldUpdate) {
+                history.back();
+            }
+        }
+    }
+}
+
 // 初始化视频播放器
 characterVideo = document.createElement('video');
 characterVideo.setAttribute('playsinline', '');
@@ -513,13 +534,26 @@ var createQtAppInstance = ( () => {
                     const height = 2;
                     const imageData = tempCtx.getImageData(x, y, width, height);
                     const data = imageData.data;
-                    let alphaSum = 0;
-                    const alphaValues = [];
-                    for (let i = 3; i < data.length; i += 4) {
-                        alphaSum += data[i];
-                        alphaValues.push(data[i])
+                    if (isApple) {
+                        let rSum = 0;
+                        let gSum = 0;
+                        let bSum = 0;
+                        for (let i = 0; i < data.length; i += 4) {
+                            rSum += data[i];
+                            gSum += data[i + 1];
+                            bSum += data[i + 2]
+                        }
+                        const rAvg = Math.round(rSum / (data.length / 4));
+                        const gAvg = Math.round(gSum / (data.length / 4));
+                        const bAvg = Math.round(bSum / (data.length / 4));
+                        // console.log("FFFFFFFFFF", rAvg, gAvg, bAvg, characterVideo.currentTime);
+                        return Math.round((rAvg + gAvg + bAvg) / 3 / 40)
                     }
-                    return Math.round(alphaSum / 4 / 40)
+                    let alphaSum = 0;
+                    for (let i = 3; i < data.length; i += 4) {
+                        alphaSum += data[i]
+                    }
+                    return Math.round(alphaSum / (data.length / 4) / 40)
                 }
                 function findRealFrame(currentFrame, currentFrame0) {
                     for (let offset = -3; offset <= 3; offset++) {
@@ -528,7 +562,7 @@ var createQtAppInstance = ( () => {
                             return candidate
                         }
                     }
-                    console.warn("No exact match found, returning approximate frame");
+                    console.warn("returning approximate frame");
                     return currentFrame
                 }
                 let realFrame = -1;
@@ -580,7 +614,7 @@ var createQtAppInstance = ( () => {
                 const imageData = new ImageData(new Uint8ClampedArray(pixelData),width,height);
                 resizedCtx.putImageData(imageData, 0, 0);
                 ctx_video.globalCompositeOperation = "source-over";
-                ctx_video.drawImage(resizedCanvas, 0, 0, width, height, rect_x, rect_y, rect_w, rect_h)
+                ctx_video.drawImage(resizedCanvas, 0, 0, width, height, rect_x, rect_y, rect_w, rect_h);
             }
         };
         function ExitStatus(status) {
