@@ -526,7 +526,7 @@ var createQtAppInstance = ( () => {
         var tempDouble;
         var tempI64;
         var ASM_CONSTS = {
-            2764468: () => {
+            2764644: () => {
                 function getAccurateFrameIndex(tempCtx, canvasWidth) {
                     const x = canvasWidth - 2;
                     const y = 0;
@@ -581,7 +581,7 @@ var createQtAppInstance = ( () => {
                 return realFrame
             }
             ,
-            2765860: ($0, $1, $2, $3) => {
+            2766392: ($0, $1, $2, $3) => {
                 let rect_x = $0;
                 let rect_y = $1;
                 let rect_w = $2;
@@ -599,7 +599,7 @@ var createQtAppInstance = ( () => {
                 Module._inputImage(imageDataPtr, 180, 180)
             }
             ,
-            2766364: ($0, $1, $2, $3) => {
+            2766896: ($0, $1, $2, $3) => {
                 let rect_x = $0;
                 let rect_y = $1;
                 let rect_w = $2;
