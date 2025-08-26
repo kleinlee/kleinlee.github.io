@@ -562,8 +562,8 @@ class PCMAudioPlayer {
 
     async _playNextAudio() {
         if (this.audioQueue.length > 0 && !this.isPlaying) {
-            // 设置最大缓冲区大小（例如：10秒的音频）
-            const maxBufferSize = 16000 * 10 * 2; // 16KHz × 10秒 × 2字节(16位)
+            // 设置最大缓冲区大小（例如：8秒的音频）
+            const maxBufferSize = 16000 * 8 * 2; // 16KHz × 8秒 × 2字节(16位)
             
             let combinedBuffer = new Uint8Array(0);
             let buffersToPlay = [];
