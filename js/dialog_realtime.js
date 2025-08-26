@@ -562,26 +562,40 @@ class PCMAudioPlayer {
 
     async _playNextAudio() {
         if (this.audioQueue.length > 0 && !this.isPlaying) {
-            // 计算总的字节长度
-            const totalLength = this.audioQueue.reduce((acc, buffer) => acc + buffer.byteLength, 0);
-            const combinedBuffer = new Uint8Array(totalLength);
-            let offset = 0;
-
-            // 将所有 audioQueue 中的 buffer 拼接到一个新的 Uint8Array 中
-            for (const buffer of this.audioQueue) {
-                combinedBuffer.set(new Uint8Array(buffer), offset);
-                offset += buffer.byteLength;
+            // 设置最大缓冲区大小（例如：10秒的音频）
+            const maxBufferSize = 16000 * 10 * 2; // 16KHz × 10秒 × 2字节(16位)
+            
+            let combinedBuffer = new Uint8Array(0);
+            let buffersToPlay = [];
+        
+            // 分批处理音频队列
+            while (this.audioQueue.length > 0) {
+                const buffer = this.audioQueue[0];
+            
+                // 如果添加这个缓冲区会超过最大大小，先播放当前的
+                if (combinedBuffer.length + buffer.byteLength > maxBufferSize && combinedBuffer.length > 0) {
+                    this._playAudio(combinedBuffer.buffer);
+                    combinedBuffer = new Uint8Array(0);
+                    // await this.delay(100); // 短暂延迟避免阻塞
+                }
+            
+                // 将缓冲区添加到当前批次
+                const newBuffer = new Uint8Array(combinedBuffer.length + buffer.byteLength);
+                newBuffer.set(combinedBuffer, 0);
+                newBuffer.set(new Uint8Array(buffer), combinedBuffer.length);
+                combinedBuffer = newBuffer;
+            
+                buffersToPlay.push(this.audioQueue.shift());
             }
-
-            // 清空 audioQueue，因为我们已经拼接完所有数据
-            this.audioQueue = [];
-            // 发送拼接的 audio 数据给 playAudio
-            this._playAudio(combinedBuffer.buffer);
-        }
-        else {
+        
+            // 播放剩余的音频
+            if (combinedBuffer.length > 0) {
+                this._playAudio(combinedBuffer.buffer);
+            }
+        } else {
             if (sse_endpoint && cosyvoice.isTaskFinished) {
-                sendButton.innerHTML = '<i class="material-icons">send</i>'; // 发送图标
-                console.log("_playAudio Done!!!!")
+                sendButton.innerHTML = '<i class="material-icons">send</i>';
+                console.log("_playAudio Done!!!!");
                 await start_new_round();
             }
         }
