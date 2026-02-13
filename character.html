@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=0" />
+    <link rel="icon" href="common/favicon.ico" type="image/x-icon">
+    <title>MatesX</title>
+    <link href="css/material-icons.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: transparent;
+            color: #333;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px 20px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            font-family: Arial, sans-serif;
+            z-index: 10;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(255, 60, 100, 0.08);
+        }
+
+        .title-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff2442, #ff6b6b, #ff2442);
+        }
+
+        #api-key {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        #api-key:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        .main-container {
+            background-color: transparent;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        #background-video,
+        #background-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+        }
+
+        #background-image {
+            display: none;
+        }
+
+        #foreground-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvas_video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #loadingSpinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 60, 100, 0.2);
+            border-top: 5px solid #ff3c64;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        #loadingSpinner strong {
+            font-size: 18px;
+            color: #333;
+        }
+
+        #startMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 26px;
+            font-weight: bold;
+            color: #333;
+            z-index: 15;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 15px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            max-width: 80%;
+        }
+
+        #startMessage:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        #canvas_gl {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 180px;
+            height: 180px;
+            opacity: 0.001;
+        }
+
+        #screen {
+            position: absolute;
+            bottom: -1000;
+            right: -1000;
+            width: 1px;
+            height: 1px;
+        }
+
+        #screen2 {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: none;
+            z-index: 5;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #startMessage {
+                font-size: 18px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 标题栏 -->
+    <div class="title-bar">
+        <input type="text" id="api-key" placeholder="输入您的阿里百炼API密钥">
+
+        <select id="voice-select">
+            <option value="longanrou">温柔闺蜜女</option>
+            <option value="longqiang_v2">浪漫风情女</option>
+            <option value="longhan_v2">温暖痴情男</option>
+            <option value="longxing_v2">温婉邻家女</option>
+            <option value="longfeifei_v2">甜美娇气女</option>
+            <option value="longxiaocheng_v2">磁性低音男</option>
+            <option value="longzhe_v2">呆板大暖男</option>
+            <option value="longyan_v2">温暖春风女</option>
+            <option value="longtian_v2">磁性理智男</option>
+            <option value="longze_v2">温暖元气男</option>
+            <option value="longshao_v2">积极向上男</option>
+            <option value="longhao_v2">多情忧郁男</option>
+            <option value="kabuleshen_v2">实力歌手男</option>
+            <option value="longjielidou_v2">阳光顽皮男</option>
+            <option value="longling_v2">稚气呆板女</option>
+        </select>
+    </div>
+
+    <div class="main-container">
+        <div id="background-container">
+            <video id="background-video" autoplay loop muted></video>
+            <img id="background-image" src="" alt="背景图片">
+        </div>
+
+        <div id="foreground-container">
+            <canvas id="canvas_video"></canvas>
+        </div>
+
+        <div id="loadingSpinner">
+            <div class="spinner"></div>
+            <strong>MatesX: 正在加载中...</strong>
+        </div>
+
+        <div id="startMessage" style="display: none;">请点击屏幕开始</div>
+    </div>
+
+    <canvas id="canvas_gl" width="180" height="180"></canvas>
+    <div id="screen"></div>
+    <iframe id="screen2" src="dialog-realtime.html" frameborder="0"></iframe>
+    <script src="js/pako.min.js"></script>
+    <script src="js/DHLiveMini2.js"></script>
+    <script src="js/MiniLive.js"></script>
+    <script src="js/MiniMateLoader_public.js"></script>
+</body>
+</html>
