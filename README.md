@@ -13,9 +13,12 @@ Notes：此案例对接阿里百炼平台的 ASR（语音识别）、LLM（大�
 
 ## 🚀 快速开始
 
-1. 直接访问[https://kleinlee.github.io/]。
+1. 直接访问[https://kleinlee.github.io/character.html](https://kleinlee.github.io/character.html)。
 2. 填入阿里百炼平台的api-key，点击开始，即可与数字人进行实时交互。
-
+3. 克隆项目进行本地修改 
+```bash
+git clone https://github.com/kleinlee/kleinlee.github.io.git
+```
 ### 🔗 相关链接
 * 创建自定义数字人：请参阅官网 [matesx.cn](matesx.cn)
 * 完整版开源项目：查看 MatesX [here](https://github.com/kleinlee/MatesX)
