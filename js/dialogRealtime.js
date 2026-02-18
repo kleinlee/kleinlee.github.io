@@ -315,7 +315,7 @@ async function handleResponseStream(responseBody, signal) {
             sseDataBuffer += chunk; // 将新数据追加到缓存区
 
             // 根据换行符拆分缓存区中的数据
-            const chunks = sse_data_buffer.split("\n");
+            const chunks = sseDataBuffer.split("\n");
             for (let i = 0; i < chunks.length - 1; i++) {
                 try {
                     const line = chunks[i].trim();
@@ -325,7 +325,7 @@ async function handleResponseStream(responseBody, signal) {
                         const data = JSON.parse(line.substring(6));
                         if (data.choices?.[0]?.delta?.content) {
                             const text = data.choices[0].delta.content;
-                            console.log("Received text:", text, sse_startpoint);
+                            console.log("Received text:", text, sseStartpoint);
                             addMessage(text, false, sseStartpoint);
                             cosyvoice.sendText(text);
                             sseStartpoint = false;
