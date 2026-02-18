@@ -40,12 +40,12 @@ class Cosyvoice {
                         model: this.model_name,
                         parameters: {
                             text_type: "PlainText",
-                            voice: this.voice_id,
-                            format: "pcm",
-                            sample_rate: 16000,
-                            volume: 50,
-                            rate: 1,
-                            pitch: 1
+                            voice: this.voice_id,      // 音色
+                            format: "pcm",		        // 音频格式
+                            sample_rate: 16000,	        // 采样率
+                            volume: 50,			        // 音量
+                            rate: 1,				    // 语速
+                            pitch: 1				    // 音调
                         },
                         "input": {}
                     }

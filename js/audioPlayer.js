@@ -35,7 +35,6 @@ class PCMAudioPlayer {
         if (event.data.type === 'playbackComplete') {
           console.log('✅ All PCM audio has been played.');
           await this.stop();
-          sendButton.innerHTML = '<i class="material-icons">send</i>'; // 发送图标
           console.log("_playAudio Done!!!!")
           await start_new_round();
         }
