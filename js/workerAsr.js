@@ -10,7 +10,7 @@ self.onmessage = async function(event) {
     const data = event.data;
     
     if (data.type === 'start') {
-        const token = data.api_key;
+        const token = data.apiKey;
         const wssUrl = `wss://dashscope.aliyuncs.com/api-ws/v1/inference/?api_key=${token}`;
         startASR(wssUrl);
     } 

@@ -229,27 +229,27 @@ let isSendProcessing = false;
 
 // 提取的共同处理函数
 async function handleUserMessage() {
+    // 1. 先获取当前按钮状态，判断用户意图
+    const icon = sendButton.querySelector('i.material-icons');
+    if (icon && icon.textContent.trim() === 'stop') {
+        user_abort();
+        return false; // 中断后直接返回，不需要继续执行后续发送逻辑
+    }
+
     if (isSendProcessing) return false;
     isSendProcessing = true;
     sendButton.disabled = true;
     textInput.disabled = true;
 
-    const icon = sendButton.querySelector('i.material-icons');
     try {
-    // 检查停止状态
-    if (icon && icon.textContent.trim() === 'stop') {
-        user_abort();
-        return false; // 表示未发送消息
-    }
-
-    const inputValue = textInput.value.trim();
-    if (inputValue) {
-        await start_new_round();
-        addMessage(inputValue, true, true);
-        await sendTextMessage(inputValue);
-        return true; // 表示已发送消息
-    }
-    return false; // 表示未发送消息
+        const inputValue = textInput.value.trim();
+        if (inputValue) {
+            await start_new_round();
+            addMessage(inputValue, true, true);
+            await sendTextMessage(inputValue);
+            return true;
+        }
+        return false;
     } finally {
         isSendProcessing = false;
         sendButton.disabled = false;
