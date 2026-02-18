@@ -325,7 +325,7 @@ async function handleResponseStream(responseBody, signal) {
                         const data = JSON.parse(line.substring(6));
                         if (data.choices?.[0]?.delta?.content) {
                             const text = data.choices[0].delta.content;
-                            console.log("Received text:", text, sseStartpoint);
+                            console.log("Received text:", text, sseStartpoint, sendButton.disabled);
                             addMessage(text, false, sseStartpoint);
                             cosyvoice.sendText(text);
                             sseStartpoint = false;
@@ -404,6 +404,7 @@ async function sendTextMessage(inputValue) {
     
     sendButton.innerHTML = '<i class="material-icons">stop</i>';
     sendButton.disabled = false;
+    console.log("sendButton.disabled", sendButton.disabled)
     if (inputValue) {
         try {
             if (sseController) {
