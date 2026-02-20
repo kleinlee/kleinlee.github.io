@@ -426,7 +426,11 @@ var createQtAppInstance = ( () => {
             return filename.startsWith("file://")
         }
         var wasmBinaryFile;
-        wasmBinaryFile = "https://matesx.oss-cn-beijing.aliyuncs.com/public/DHLiveMini2.wasm.gz";
+        if (window.location.hostname.endsWith('matesx.com')) {
+            wasmBinaryFile = "https://matesx.oss-cn-beijing.aliyuncs.com/public/DHLiveMini2.wasm.gz";
+        } else {
+            wasmBinaryFile = "/wasm/DHLiveMini2.wasm";
+        }
         if (!isDataURI(wasmBinaryFile)) {
             wasmBinaryFile = locateFile(wasmBinaryFile)
         }
