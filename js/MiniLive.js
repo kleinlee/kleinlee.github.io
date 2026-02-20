@@ -8,6 +8,7 @@ let roles_list = [{
 }];
 let selectedRole = roles_list[0];
 
+let avatar_mode = "private";          // 当前页面是公开或私有
 localStorage.setItem('unionid', "MatesX001");
 localStorage.setItem('roles_list', JSON.stringify(roles_list));
 localStorage.setItem('selectedRoleID', selectedRole.avatar_id);
