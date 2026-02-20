@@ -1,11 +1,16 @@
-let selectedRole = {
+let roles_list = [{
+    "avatar_id": "000",
     "system_prompt": "你将扮演如下角色：姓名：苏婉。身份：28岁，独立插画师，喜欢在午后晒太阳和喝手冲咖啡。\
             性格：温柔知性，情绪极其稳定，拥有一种让人静下来的魔力。不刻意讨好，但总能精准捕捉对方的情绪点。\
             语言风格：语速舒缓，喜欢用叠词或语气词（呢、呀、吧），但不过分卖萌。善于倾听，回复通常带有深意或安慰感。",
     "video_url": "https://matesx.oss-cn-beijing.aliyuncs.com/avatar/api/b4d284fa-d8a5-47f1-8365-1f0c2ed610b7/processed.webm",
     "video_asset_url": "https://matesx.oss-cn-beijing.aliyuncs.com/avatar/api/b4d284fa-d8a5-47f1-8365-1f0c2ed610b7/processed.gz",
-};
+}];
+let selectedRole = roles_list[0];
 
+localStorage.setItem('unionid', "MatesX001");
+localStorage.setItem('roles_list', JSON.stringify(roles_list));
+localStorage.setItem('selectedRoleID', selectedRole.avatar_id);
 localStorage.setItem('selectedRole', JSON.stringify(selectedRole));
 
 characterVideo.addEventListener('loadedmetadata', () => {
@@ -14,18 +19,15 @@ characterVideo.addEventListener('loadedmetadata', () => {
                     canvas_video.height = characterVideo.videoHeight;
 });
 
-// 全局变量
 let isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-// 初始化页面
-document.addEventListener('DOMContentLoaded', function() {
-    // 添加开始按钮事件
-    document.getElementById('startMessage').addEventListener('click', async function() {
-        this.style.display = 'none';
-        document.getElementById('screen2').style.display = 'block';
 
-        playCharacterVideo();
-    });
-});
+async function startPlayVideo() {
+    const selectedRoleID = localStorage.getItem('selectedRoleID');
+    const selectedRole = getRoleByID(avatar_mode, selectedRoleID);
+    if (!selectedRole) throw new Error('角色信息不存在，请重新选择');
+    console.log("selectedRole: ", selectedRole)
+    playCharacterVideo(selectedRole.avatar_id);
+}
 
 async function loadSecret(secret) {
     try {
@@ -48,14 +50,13 @@ async function loadSecret(secret) {
     }
 }
 async function fetchVideoUtilData(gzipUrl) {
-        // 从服务器加载 Gzip 压缩的 JSON 文件
-        const response = await fetch(gzipUrl);
-        const compressedData = await response.arrayBuffer();
-        const decompressedData = pako.inflate(new Uint8Array(compressedData), { to: 'string' });
-//        const combinedData = JSON.parse(decompressedData);
-        return decompressedData;
+    // 从服务器加载 Gzip 压缩的 JSON 文件
+    const response = await fetch(gzipUrl);
+    const compressedData = await response.arrayBuffer();
+    const decompressedData = pako.inflate(new Uint8Array(compressedData), { to: 'string' });
+    return decompressedData;
 }
-async function newVideoTask() {
+async function newVideoTask(selectedRole) {
     try {
         console.log("selectedRole: ", selectedRole)
 
@@ -64,7 +65,7 @@ async function newVideoTask() {
         await loadSecret(combinedData);
     } catch (error) {
         console.error('视频任务初始化失败:', error);
-        alert(`操作失败: ${error.message}`);
+        XSAlert(`操作失败: ${error.message}`);
     }
 }
 
@@ -72,8 +73,10 @@ async function newVideoTask() {
 const videoURLCache = new Map();
 
 // 播放角色视频
-async function playCharacterVideo() {
-    await newVideoTask();
+async function playCharacterVideo(avatar_id) {
+    localStorage.setItem('selectedRoleID', avatar_id);
+    const selectedRole = getRoleByID(avatar_mode, avatar_id);
+    await newVideoTask(selectedRole);
     
     // 获取原始视频URL
     const originalVideoURL = selectedRole.video_url;

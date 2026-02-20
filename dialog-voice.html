@@ -18,16 +18,18 @@
         }
 
         .top-area {
-            height: 60%;
+            height: 45%;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .chat-container {
-            flex: 1;
+            height: calc(55vh - 60px);
+            min-height: 0;
             overflow-y: auto;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.0) 100%);
@@ -39,33 +41,34 @@
         }
 
         .message {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: flex;
             align-items: flex-end;
         }
 
-        .message.ai {
+        /* .message.ai {
             justify-content: flex-start;
         }
 
         .message.user {
             justify-content: flex-end;
-        }
+        } */
 
         .message-content {
-            max-width: 70%;
-            padding: 10px 15px;
-            border-radius: 15px;
+            max-width: 90%;
+            padding: 8px 8px;
+            border-radius: 8px;
             position: relative;
+            font-size: 13px;
         }
 
         .message.ai .message-content {
-            background-color: #e0e0e0;
+            background-color: #e0e0e055;
             color: #333;
         }
 
         .message.user .message-content {
-            background-color: #FF2442;
+            background-color: #FF244255;
             color: #fff;
         }
 
@@ -140,38 +143,108 @@
             font-size: 16px;
             color: #FF2442;
         }
-        #interrupt-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #FF2442;
-            border: none;
-            cursor: pointer;
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 20px 20px 30px;
+            background: transparent;
+            z-index: 100;
+            gap: 8px;
+        }
+
+        .status-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            order: 1;
+        }
+
+        .voice-waves {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            height: 32px;
+            order: 1;
+        }
+
+        .voice-wave {
+            width: 5px;
+            height: 8px;
+            background: #FF2442;
+            border-radius: 3px;
+            animation: none;
+            transition: height 0.2s ease;
+        }
+
+        .voice-wave.active {
+            animation: wave 0.6s ease-in-out infinite;
+        }
+
+        .voice-wave:nth-child(1).active { animation-delay: 0s; }
+        .voice-wave:nth-child(2).active { animation-delay: 0.08s; }
+        .voice-wave:nth-child(3).active { animation-delay: 0.16s; }
+        .voice-wave:nth-child(4).active { animation-delay: 0.24s; }
+        .voice-wave:nth-child(5).active { animation-delay: 0.32s; }
+
+        @keyframes wave {
+            0%, 100% { height: 8px; }
+            50% { height: 28px; }
+        }
+
+        .status-text {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            order: 2;
+        }
+
+        .button-row {
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.4);
+            gap: 40px;
+            order: 2;
+        }
+
+        .mute-button, .close-button, .interrupt-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
-            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
-        #interrupt-button:hover {
-            background-color: #e0203a;
-            transform: translate(-50%, -50%) scale(1.1);
-            box-shadow: 0 6px 16px rgba(255, 36, 66, 0.5);
+        .mute-button:hover, .close-button:hover, .interrupt-button:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.08);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
 
-        #interrupt-button:active {
-            transform: translate(-50%, -50%) scale(0.95);
+        .mute-button:active, .close-button:active, .interrupt-button:active {
+            transform: scale(0.95);
         }
 
-        #interrupt-button .material-icons {
-            color: #fff;
-            font-size: 28px;
+        .mute-button .material-icons, .close-button .material-icons, .interrupt-button .material-icons {
+            font-size: 30px;
+            color: #333;
+        }
+
+        .close-button .material-icons {
+            color: #FF2442;
         }
     </style>
 </head>
@@ -184,12 +257,8 @@
         <!-- 聊天记录将显示在这里 -->
     </div>
 
-    <button id="interrupt-button" title="打断">
-        <i class="material-icons">play_arrow</i>
-    </button>
-
     <!-- 输入区域 -->
-    <div class="input-container" id="input-container">
+    <div class="input-container hidden" id="input-container">
         <div class="input-area" id="input-area">
             <button class="input-toggle" id="toggle-button">
                 <i class="material-icons">keyboard</i>
@@ -203,11 +272,39 @@
             </button>
         </div>
     </div>
+
+    <!-- 底部栏 -->
+    <div class="bottom-bar">
+        <div class="status-area">
+            <div class="voice-waves" id="voice-waves">
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+            </div>
+            <div class="status-text" id="status-text">点击开始聊天</div>
+        </div>
+        
+        <div class="button-row">
+            <button class="mute-button" id="mute-button" title="静音">
+                <i class="material-icons">mic</i>
+            </button>
+            
+            <button class="interrupt-button" id="interrupt-button" title="打断">
+                <i class="material-icons">pause</i>
+            </button>
+            
+            <button class="close-button" id="close-button" title="关闭对话">
+                <i class="material-icons">close</i>
+            </button>
+        </div>
+    </div>
     <script src="js/xsComponents.js"></script>
     <script src="js/localStorageManager.js"></script>
     <script src="js/cosyvoiceApi.js"></script>
     <script src="js/audioPlayer.js"></script>
     <script src="js/audioRecorder.js"></script>
-    <script src="js/dialogRealtime.js"></script>
+    <script src="js/dialogVoice.js"></script>
 </body>
 </html>

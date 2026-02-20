@@ -1,0 +1,208 @@
+/* xs-styles.css */
+/* 版本: 1.0.0 */
+
+/* 基础样式重置 */
+.xs-component-reset * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+    --xs-primary: #ff2442;
+    --xs-primary-hover: #ff4d6a;
+    --xs-secondary: #fde8ec;
+    --xs-text: #333;
+    --xs-text-light: #666;
+    --xs-border: #e0e0e0;
+    --xs-background: #fff;
+    --xs-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --xs-radius: 12px;
+}
+
+/* 遮罩层 */
+.xs-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.xs-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 模态框 */
+.xs-modal {
+    background: var(--xs-background);
+    border-radius: var(--xs-radius);
+    width: 75%;
+    max-width: 400px;
+    padding: 0;
+    overflow: hidden;
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: var(--xs-shadow);
+    position: relative;
+    margin: auto; /* 确保居中 */
+}
+
+.xs-overlay.active .xs-modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.xs-modal-header {
+    padding: 20px 24px 10px;
+    text-align: center;
+    position: relative;
+}
+
+.xs-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--xs-text);
+}
+
+.xs-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--xs-text-light);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.xs-modal-close:hover {
+    background: #f5f5f5;
+    color: var(--xs-text);
+}
+
+.xs-modal-body {
+    padding: 20px 24px;
+    color: var(--xs-text-light);
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.xs-modal-footer {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    border-top: 1px solid var(--xs-border);
+}
+
+/* 按钮样式 */
+.xs-button {
+    background: var(--xs-primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    text-align: center;
+    display: inline-block;
+}
+
+.xs-button:hover {
+    background: var(--xs-primary-hover);
+    transform: translateY(-1px);
+}
+
+.xs-button.xs-secondary {
+    background: white;
+    color: var(--xs-primary);
+    border: 1px solid var(--xs-primary);
+}
+
+.xs-button.xs-secondary:hover {
+    background: var(--xs-secondary);
+}
+
+/* Toast提示 */
+.xs-toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 24px;
+    z-index: 10001;
+    opacity: 0;
+    transition: all 0.4s ease;
+    font-size: 14px;
+    max-width: 80%;
+    text-align: center;
+}
+
+.xs-toast.active {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* Loading指示器 */
+.xs-loading {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 36, 66, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--xs-primary);
+    animation: xs-spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+.xs-loading-container {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.xs-loading-text {
+    margin-top: 15px;
+    color: var(--xs-text-light);
+    font-size: 14px;
+}
+
+/* 动画定义 */
+@keyframes xs-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes xs-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes xs-slide-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

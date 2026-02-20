@@ -1,14 +1,9 @@
 window.addEventListener('DOMContentLoaded', init_render_);
 
-async function init_render_()
-{
-    const spinner = document.querySelector('#loadingSpinner');
+async function init_render_() {
     const screen = document.querySelector('#screen');
-    const startMessage = document.getElementById('startMessage');
     const showUi = () => {
-        spinner.style.display = 'none';
         screen.style.display = 'block';
-        startMessage.style.display = 'block'; // 显示开始提示
     }
     const instance = await qtLoad({
         qt: {

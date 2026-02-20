@@ -26,7 +26,6 @@ const sendButton = document.getElementById('send-button');
 const textInput = document.getElementById('text-input');
 const voiceInputArea = document.getElementById('voice-input-area');
 const voiceInputText = voiceInputArea.querySelector('span');
-const interruptButton = document.getElementById('interrupt-button');
 
 // 初始化基础数据
 const unionid = localStorage.getItem('unionid') || "";
@@ -39,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // 初始设置为语音模式
     setVoiceMode();
+    // 初始化打断按钮状态
+    updateInterruptButton();
 });
 
 // 语音模式
@@ -82,7 +83,9 @@ asrWorker.onmessage = function(event) {
     if (data.type === 'status') {
         if (data.message === "识别任务已完成")
         {
+            isUserSpeaking = false;
             if (asrText) {
+                setAiSpeaking(true);
                 addMessage(asrText, true, true);
                 sendTextMessage(asrText);
             }
@@ -93,6 +96,7 @@ asrWorker.onmessage = function(event) {
         }
         else if (data.message === "已连接到ASR服务器") {
             isAsrReady = true;
+            isUserSpeaking = true;
 
             // 发送所有缓存数据
             while (pendingAudioData.length > 0) {
@@ -153,6 +157,7 @@ async function running_audio_recorder() {
                     const asrToken = await getTempToken("ali", "");
                     asrWorker.postMessage({ type: 'start', apiKey: asrToken });
                 }
+                isUserSpeaking = true;
                 if (isAsrReady) {
                     asrWorker.postMessage(
                         { type: 'audio', data: pcmData },
@@ -178,6 +183,8 @@ async function running_audio_recorder() {
                             data: pcmData
                         }, [pcmData.buffer]); // 转移ArrayBuffer所有权
                     }
+                } else {
+                    isUserSpeaking = false;
                 }
             }
         });
@@ -185,6 +192,9 @@ async function running_audio_recorder() {
 }
 
 async function start_new_round() {
+    isUserSpeaking = true;
+    setAiSpeaking(false);
+
     sendButton.innerHTML = '<i class="material-icons">send</i>'; 
 
     // 停止可能存在的旧轮次
@@ -296,7 +306,7 @@ async function handleResponseStream(responseBody, signal) {
     try {
         while (true) {
             if (signal.aborted) {
-                reader.cancel();
+                reader.cancel(); // 主动取消流读取
                 break;
             }
             const { done, value } = await reader.read();
@@ -306,6 +316,7 @@ async function handleResponseStream(responseBody, signal) {
             const chunk = decoder.decode(value, { stream: true });
             sseDataBuffer += chunk; // 将新数据追加到缓存区
 
+            // 根据换行符拆分缓存区中的数据
             const chunks = sseDataBuffer.split("\n");
             for (let i = 0; i < chunks.length - 1; i++) {
                 try {
@@ -444,11 +455,114 @@ async function user_abort() {
         parent.Module._clearAudio();
     }
     sendButton.innerHTML = '<i class="material-icons">send</i>'; // 发送图标
+
+    isUserSpeaking = false;
+    console.log("user_abort setAiSpeaking false");
+    setAiSpeaking(false);
+    updateInterruptButton();
 }
 
-interruptButton.addEventListener('click', async function() {
-    if (window.parent && window.parent.startPlayVideo) {
-        window.parent.startPlayVideo();
+const muteButton = document.getElementById('mute-button');
+const closeButton = document.getElementById('close-button');
+const interruptButton = document.getElementById('interrupt-button');
+const statusText = document.getElementById('status-text');
+const voiceWaves = document.getElementById('voice-waves');
+const voiceWaveElements = voiceWaves.querySelectorAll('.voice-wave');
+
+let isMuted = false;
+let isAiSpeaking = false;
+let isUserSpeaking = false;
+let hasPlayedOnce = false;
+
+function updateStatus(status) {
+    statusText.textContent = status;
+}
+
+function setVoiceWavesActive(active, type = 'user') {
+    voiceWaveElements.forEach((wave, index) => {
+        if (active) {
+            wave.classList.add('active');
+            if (type === 'ai') {
+                wave.style.animationDelay = `${index * 0.12}s`;
+            } else {
+                wave.style.animationDelay = `${index * 0.08}s`;
+            }
+        } else {
+            wave.classList.remove('active');
+            wave.style.animationDelay = '';
+        }
+    });
+}
+
+function setAiSpeaking(speaking) {
+    console.log("setAiSpeaking", speaking, isUserSpeaking)
+    isAiSpeaking = speaking;
+    if (speaking) {
+        updateStatus('回复中');
+        setVoiceWavesActive(true, 'ai');
+    } else {
+        if (isUserSpeaking) {
+            updateStatus('正在听');
+            setVoiceWavesActive(true, 'user');
+        } else {
+            updateStatus('点击开始聊天');
+            setVoiceWavesActive(false);
+        }
     }
-    this.style.display = 'none';
+}
+
+function updateInterruptButton() {
+    const iconEl = interruptButton.querySelector('.material-icons');
+    if (!hasPlayedOnce) {
+        iconEl.textContent = 'play_arrow';
+        interruptButton.title = '播放';
+    } else {
+        iconEl.textContent = 'pause';
+        interruptButton.title = '打断';
+    }
+}
+
+muteButton.addEventListener('click', async function() {
+    try {
+        const iconEl = muteButton.querySelector('.material-icons');
+        await user_abort();
+        isMuted = !isMuted;
+        if (isMuted) {
+            iconEl.textContent = 'mic_off';
+            muteButton.title = '取消静音';
+            updateStatus('你已静音');
+        } else {
+            iconEl.textContent = 'mic';
+            muteButton.title = '静音';
+            updateStatus('点击开始聊天');
+        }
+        hasPlayedOnce = false;
+        updateInterruptButton();
+        setVoiceWavesActive(false);
+        isUserSpeaking = false;
+        setAiSpeaking(false);
+    } catch (e) {
+        console.error('静音功能出错:', e);
+    }
+});
+
+closeButton.addEventListener('click', function() {
+    window.parent.history.back();
+});
+
+interruptButton.addEventListener('click', async function() {
+    try {
+        if (!hasPlayedOnce) {
+            hasPlayedOnce = true;
+            updateInterruptButton();
+            if (window.parent && window.parent.startPlayVideo) {
+                window.parent.startPlayVideo();
+            }
+        } else {
+            await user_abort();
+        }
+        await start_new_round();
+    } catch (e) {
+        console.error('打断/播放功能出错:', e);
+    }
 });
