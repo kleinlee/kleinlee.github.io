@@ -33,7 +33,7 @@ let rolesList = JSON.parse(localStorage.getItem('roles_list')) || [];
 
 document.addEventListener('DOMContentLoaded', function() {
     if (!window.isSecureContext) {
-        alert('本项目使用了 WebCodecs API，该 API 仅在安全上下文（HTTPS 或 localhost）中可用。' +
+        XSAlert('本项目使用了 WebCodecs API，该 API 仅在安全上下文（HTTPS 或 localhost）中可用。' +
               '因此，在部署或测试时，请确保您的网页在 HTTPS 环境下运行，或者使用 localhost 进行本地测试。');
     }
     // 初始设置为语音模式
@@ -77,7 +77,7 @@ toggleButton.addEventListener('click', () => {
 asrWorker = new Worker('js/workerAsr.js');
 
 // 处理来自Worker的消息
-asrWorker.onmessage = function(event) {
+asrWorker.onmessage = async function(event) {
     const data = event.data;
     console.log("asrWorker.onmessage", data, data.type)
     if (data.type === 'status') {
@@ -90,8 +90,8 @@ asrWorker.onmessage = function(event) {
                 sendTextMessage(asrText);
             }
             else {
-                user_abort();
-                start_new_round();
+                await user_abort();
+                await start_new_round();
             }
         }
         else if (data.message === "已连接到ASR服务器") {
@@ -306,7 +306,7 @@ async function handleResponseStream(responseBody, signal) {
     try {
         while (true) {
             if (signal.aborted) {
-                reader.cancel(); // 主动取消流读取
+                reader.cancel();
                 break;
             }
             const { done, value } = await reader.read();
