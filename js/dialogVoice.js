@@ -520,6 +520,14 @@ function updateInterruptButton() {
         iconEl.textContent = 'pause';
         interruptButton.title = '打断';
     }
+    interruptButton.disabled = isMuted;
+    if (isMuted) {
+        interruptButton.style.opacity = '0.5';
+        interruptButton.style.pointerEvents = 'none';
+    } else {
+        interruptButton.style.opacity = '1';
+        interruptButton.style.pointerEvents = 'auto';
+    }
 }
 
 muteButton.addEventListener('click', async function() {
@@ -551,6 +559,7 @@ closeButton.addEventListener('click', function() {
 });
 
 interruptButton.addEventListener('click', async function() {
+    if (isMuted) return;
     try {
         if (!hasPlayedOnce) {
             hasPlayedOnce = true;
